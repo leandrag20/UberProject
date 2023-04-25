@@ -182,6 +182,7 @@ ggplot(df_combined, aes(x = Month, y = dayName)) +
 ggplot(df_combined, aes(x = weekNum, y = Month)) +
   stat_bin2d(aes(fill = after_stat(count)), binwidth = c(1, 1)) +
   scale_fill_gradient(low = "white", high = "blue") +
+  ggtitle("Week of Month and Month") +
   labs(x = "Week of Month", y = "Month", fill = "Number of Trips")
 
 #Heat map Bases and Day of Week
@@ -220,3 +221,41 @@ server <- function(input, output) {
 
 # Run the app
 shinyApp(ui, server)
+
+
+
+ui <- fluidPage(
+  titlePanel("Uber Rides April-September 2014"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("VariableX", label = "Select Variable X", choices = colnames(df_combined)),
+      selectInput("VariableY", label = "Select Variable Y", choices = colnames(df_combined)),
+      selectInput("Fill", label = "Select Fill Variable", choices = colnames(df_combined))
+    ),
+    mainPanel(
+      tabPanel("Chart", plotOutput("plot1")),
+      tabPanel("Heat Map", plotOutput("plot2"))
+    )
+  )
+)
+
+server <- function(input, output) {
+  selected_variables <- reactive({
+    df_combined %>% group_by(!!sym(input$VariableX), !!sym(input$Fill)) %>% summarise(Count = n())
+  })
+  
+  output$plot1 <- renderPlot({
+    ggplot(selected_variables(), aes(x = !!sym(input$VariableX), y = Count, fill = !!sym(input$Fill))) + 
+      geom_bar(stat = "identity")
+  })
+  
+  output$plot2 <- renderPlot({
+    ggplot(selected_variables(), aes(x = !!sym(input$VariableX), y = !!sym(input$VariableY))) +
+      stat_bin2d(aes(fill = after_stat(count/sum(count))), binwidth = c(1, 1)) +
+      scale_fill_gradient(low = "white", high = "blue") +
+      labs(x = "Base", y = "Day of Week", fill = "Number of Trips")
+  })
+}
+
+shinyApp(ui, server)
+
