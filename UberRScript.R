@@ -202,17 +202,19 @@ corrplot(B, method="color")
 
 
 #Leaflet Shiny Geospatial Map this portion is subject to change. 
-#UI
 ui <- fluidPage(
   leafletOutput("map")
 )
 
 # Server
 server <- function(input, output) {
+  # Create a Leaflet map
   output$map <- renderLeaflet({
-    leaflet() %>% 
+    leaflet(data = df_combined) %>% 
+      # Add map tiles
       addTiles() %>% 
-      addMarkers(~Lon,~Lat)
+      # Add markers for each trip start location
+      addMarkers(lng = df_combined$Lon, lat = df_combined$Lat)
   })
 }
 
