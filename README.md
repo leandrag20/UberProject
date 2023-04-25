@@ -1,6 +1,7 @@
 # UberProject
 
 For this project I analyzed the data from 6 months during the year 2014 and the rides from Uber that took place. Throughout this project, I cleaned the data, extracted certain values into seperate columns and use that data to create graphs and models to help better understand how popular Uber was during this time. 
+
 ![image](https://user-images.githubusercontent.com/113047041/234376822-d2c5265f-f7ee-46b6-b71a-12a3651cc8cf.png)
 
 # Dictionary📝
@@ -100,6 +101,7 @@ head(round(B,2))
 corrplot(B, method="color")
 ```
 This table below shows how there was little to no correlation with all the variables:
+
 <img width="362" alt="Screen Shot 2023-04-25 at 2 44 43 PM" src="https://user-images.githubusercontent.com/113047041/234386505-224a9b95-640c-4723-be6c-0ef295d2d7dd.png">
 
 # Leaflet Shiny Geospatial
@@ -162,3 +164,5 @@ server <- function(input, output) {
 
 shinyApp(ui, server)
 ```
+
+Shiny Link: https://leandrag20.shinyapps.io/UberProject/
