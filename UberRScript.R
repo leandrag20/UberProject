@@ -223,14 +223,14 @@ server <- function(input, output) {
 shinyApp(ui, server)
 
 
-
+df_combined_subset <- select(df_combined, colnames(df_combined)[4:5], colnames(df_combined)[8:9], colnames(df_combined)[11:12])
 ui <- fluidPage(
   titlePanel("Uber Rides April-September 2014"),
   sidebarLayout(
     sidebarPanel(
-      selectInput("VariableX", label = "Select Variable X", choices = colnames(df_combined)),
-      selectInput("VariableY", label = "Select Variable Y", choices = colnames(df_combined)),
-      selectInput("Fill", label = "Select Fill Variable", choices = colnames(df_combined))
+      selectInput("VariableX", label = "Select Variable X", choices = unique(colnames(df_combined_subset))),
+      selectInput("VariableY", label = "Select Variable Y", choices = c("Date", "dayName", "Month")),
+      selectInput("Fill", label = "Select Fill Variable", choices = unique(colnames(df_combined_subset)))
     ),
     mainPanel(
       tabPanel("Chart", plotOutput("plot1")),
@@ -250,10 +250,9 @@ server <- function(input, output) {
   })
   
   output$plot2 <- renderPlot({
-    ggplot(selected_variables(), aes(x = !!sym(input$VariableX), y = !!sym(input$VariableY))) +
-      stat_bin2d(aes(fill = after_stat(count/sum(count))), binwidth = c(1, 1)) +
-      scale_fill_gradient(low = "white", high = "blue") +
-      labs(x = "Base", y = "Day of Week", fill = "Number of Trips")
+    ggplot(selected_variables(), aes(x = !!sym(input$VariableX), y = !!sym(input$VariableY), fill = ..count..)) +
+      geom_tile() +
+      scale_fill_gradient(low = "white", high = "blue")
   })
 }
 
