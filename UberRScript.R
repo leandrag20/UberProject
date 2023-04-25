@@ -33,12 +33,12 @@ julyData$Month <- "July"
 augustData$Month <- "August"
 septemberData$Month <- "September"
 
-aprilData$monthNum <- 1
-mayData$monthNum <- 2
-juneData$monthNum <- 3
-julyData$monthNum <- 4
-augustData$monthNum <- 5
-septemberData$monthNum <- 6
+aprilData$monthNum <- 4
+mayData$monthNum <- 5
+juneData$monthNum <- 6
+julyData$monthNum <- 7
+augustData$monthNum <- 8
+septemberData$monthNum <- 9
 
 df_combined <- rbind(aprilData, mayData, juneData, julyData, augustData, septemberData)
 
