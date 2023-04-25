@@ -10,6 +10,7 @@ library(leaflet.extras)
 library(caret)
 library(magrittr)
 library(corrplot)
+library(terra)
 
 rm(list=ls())
 
