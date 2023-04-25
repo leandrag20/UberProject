@@ -5,14 +5,23 @@ For this project I analyzed the data from 6 months during the year 2014 and the 
 
 # Dictionary📝
 The main columns I used during this project were:
+
 Base: the base where the ride was from
+
 Lat: The latitude coordinate from the ride
+
 Lon: The longitude coordinate from the ride
+
 Month: The month in which the ride took place
+
 Time: The time in which the ride took place
+
 Date: The date in which the ride took place
+
 Hour: The hour in which the ride took place
+
 dayName: The day of the week in which the ride took place
+
 weekNum: The week of the month in which the ride took place
 
 # Data Cleaning🧹
@@ -53,7 +62,7 @@ df_combined$dayName <- ifelse(df_combined$totalDay %% 7 == 1, "Tuesday", df_comb
 df_combined$weekNum <- ifelse((df_combined$Month == "April" | df_combined$Month == "July") & df_combined$Date <= 31, 5, df_combined$weekNum)
 ```
 
-#Creating Pivot Tables, Heat Maps and Charts
+# Creating Pivot Tables, Heat Maps and Charts
 The next step after cleaning the data was to put it into Pivot Tables and Charts so the images of what exactly was happening could become more clear. Almost every Chart and Pivot Table code followed as similar format to the ones below, but differs from what exactly was being plotted:
 ```R
 month_counts <- table(df_combined$Month)
@@ -80,7 +89,7 @@ ggplot(df_combined, aes(x = Hour, y = Date)) +
   labs(x = "Hour of Day", y = "Day of Month", fill = "Number of Trips")
 ```
 
-#Prediction Model
+# Prediction Model
 In order to try and predict when rides would happen, I made a correlation chart. This chart sadly did not help me gain any knowledge in when rides would happen due to there being close to no correlation in every variable. This correlation chart was made through:
 ```R
 df_cortable<-df_combined %>%
@@ -93,7 +102,7 @@ corrplot(B, method="color")
 This table below shows how there was little to no correlation with all the variables:
 <img width="362" alt="Screen Shot 2023-04-25 at 2 44 43 PM" src="https://user-images.githubusercontent.com/113047041/234386505-224a9b95-640c-4723-be6c-0ef295d2d7dd.png">
 
-#Leaflet Shiny Geospatial
+# Leaflet Shiny Geospatial
 The next part of this project was the create a simple Leaflet Shiny Geospatial, which I did through the following code:
 ```R
 ui <- fluidPage(
@@ -115,7 +124,7 @@ server <- function(input, output) {
 shinyApp(ui, server)
 ```
 
-#Shiny App
+# Shiny App
 The last part that needed to be completed for this project was to make a Shiny App to show the graphs that were made through the project. This was completed through the following code:
 ```R
 ui <- fluidPage(
