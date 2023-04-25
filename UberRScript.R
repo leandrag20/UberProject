@@ -9,6 +9,7 @@ library(shiny)
 library(leaflet.extras)
 library(caret)
 library(magrittr)
+library(corrplot)
 
 rm(list=ls())
 
@@ -32,12 +33,19 @@ julyData$Month <- "July"
 augustData$Month <- "August"
 septemberData$Month <- "September"
 
+aprilData$monthNum <- 1
+mayData$monthNum <- 2
+juneData$monthNum <- 3
+julyData$monthNum <- 4
+augustData$monthNum <- 5
+septemberData$monthNum <- 6
+
 df_combined <- rbind(aprilData, mayData, juneData, julyData, augustData, septemberData)
 
 df_combined$Time <- str_sub(df_combined$Date.Time, -8, -1)
 df_combined$Date <- as.Date(df_combined$Date.Time, format = "%m/%d/%Y")
 df_combined$Date <- as.numeric(str_sub(df_combined$Date, -2, -1))
-df_combined$Hour <- str_sub(df_combined$Time, -8, -7)
+df_combined$Hour <- as.numeric(str_sub(df_combined$Time, -8, -7))
 
 # Create a new column for total day, dayName and weekNum
 df_combined <- df_combined %>% 
@@ -148,37 +156,37 @@ ggplot(base_monthly_trips, aes(x = Base, y = Count, fill = Month)) +
 
 #Heat map that displays by hour and day
 ggplot(df_combined, aes(x = Hour, y = Date)) +
-  stat_bin2d(aes(fill = ..count..), binwidth = c(1, 1)) +
+  stat_bin2d(aes(fill = after_stat(count)), binwidth = c(1, 1)) +
   scale_fill_gradient(low = "white", high = "blue") +
   ggtitle("Hour and Date") +
   labs(x = "Hour of Day", y = "Day of Month", fill = "Number of Trips")
 ggplot(df_combined, aes(x = Hour, y = dayName)) +
-  stat_bin2d(aes(fill = ..count..), binwidth = c(1, 1)) +
+  stat_bin2d(aes(fill = after_stat(count)), binwidth = c(1, 1)) +
   scale_fill_gradient(low = "white", high = "blue") +
   ggtitle("Hour and Day of Week") +
   labs(x = "Hour of Day", y = "Day of Week", fill = "Number of Trips")
 
 #Heat map by month and day
 ggplot(df_combined, aes(x = Month, y = Date)) +
-  stat_bin2d(aes(fill = ..count..), binwidth = c(1, 1)) +
+  stat_bin2d(aes(fill = after_stat(count)), binwidth = c(1, 1)) +
   scale_fill_gradient(low = "white", high = "blue") +
   ggtitle("Month and Date") +
   labs(x = "Month", y = "Day of Month", fill = "Number of Trips")
 ggplot(df_combined, aes(x = Month, y = dayName)) +
-  stat_bin2d(aes(fill = ..count..), binwidth = c(1, 1)) +
+  stat_bin2d(aes(fill = after_stat(count)), binwidth = c(1, 1)) +
   scale_fill_gradient(low = "white", high = "blue") +
   ggtitle("Month and Day of Week") +
   labs(x = "Month", y = "Day of Week", fill = "Number of Trips")
 
 #Heat map by month and week
 ggplot(df_combined, aes(x = weekNum, y = Month)) +
-  stat_bin2d(aes(fill = ..count..), binwidth = c(1, 1)) +
+  stat_bin2d(aes(fill = after_stat(count)), binwidth = c(1, 1)) +
   scale_fill_gradient(low = "white", high = "blue") +
   labs(x = "Week of Month", y = "Month", fill = "Number of Trips")
 
 #Heat map Bases and Day of Week
 ggplot(df_combined, aes(x = Base, y = dayName)) +
-  stat_bin2d(aes(fill = ..count..), binwidth = c(1, 1)) +
+  stat_bin2d(aes(fill = after_stat(count)), binwidth = c(1, 1)) +
   scale_fill_gradient(low = "white", high = "blue") +
   ggtitle("Base and Day of Week") +
   labs(x = "Base", y = "Day of Week", fill = "Number of Trips")
@@ -186,7 +194,7 @@ ggplot(df_combined, aes(x = Base, y = dayName)) +
 
 #prediction model
 df_cortable<-df_combined %>%
-  select(dayName, Time, Base)
+  select(Date, Hour, weekNum, Lat, Lon, monthNum)
 head(df_cortable)
 B<-cor(df_cortable)
 head(round(B,2))
@@ -201,13 +209,10 @@ ui <- fluidPage(
 
 # Server
 server <- function(input, output) {
-  # Create a Leaflet map
   output$map <- renderLeaflet({
-    leaflet(data = df_combined) %>% 
-      # Add map tiles
+    leaflet() %>% 
       addTiles() %>% 
-      # Add markers for each trip start location
-      addMarkers(lng = df_combined$Lon, lat = df_combined$Lat)
+      addMarkers(~Lon,~Lat)
   })
 }
 
