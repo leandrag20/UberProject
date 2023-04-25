@@ -130,7 +130,9 @@ ggplot(hourly_monthly_trips, aes(x = Hour, y = Count, fill = Month)) +
 #Plot data by trips taken during every day of the month.
 daily_trips <- df_combined %>% group_by(Date) %>% summarise(Trips = n()) 
 ggplot(daily_trips, aes(x = Date, y = Trips)) + 
-  geom_line()
+  geom_line() +
+  ggtitle("Count of Trips by Every Day of the Month") +
+  xlab("Date") + ylab("Trips")
 
 #day of week chart
 day_of_week_counts <- df_combined %>% group_by(dayName) %>% summarise(Count = n())
