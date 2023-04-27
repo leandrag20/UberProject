@@ -129,39 +129,125 @@ shinyApp(ui, server)
 # Shiny App
 The last part that needed to be completed for this project was to make a Shiny App to show the graphs that were made through the project. This was completed through the following code:
 ```R
-df_combined_subset <- select(df_combined, colnames(df_combined)[4:5], colnames(df_combined)[8:9], colnames(df_combined)[11:12])
 ui <- fluidPage(
-  titlePanel("Uber Rides April-September 2014"),
   sidebarLayout(
     sidebarPanel(
-      selectInput("VariableX", label = "Select Variable X", choices = unique(colnames(df_combined_subset))),
-      selectInput("VariableY", label = "Select Variable Y", choices = c("Date", "dayName", "Month")),
-      selectInput("Fill", label = "Select Fill Variable", choices = unique(colnames(df_combined_subset)))
+      selectInput(inputId = "plot_type", 
+                  label = "Choose plot type:", 
+                  choices = c("Trips by Month", 
+                              "Trips by Hour", 
+                              "Trips by Day",
+                              "Trips by Hour and Month",
+                              "Trips by Day of Week",
+                              "Trips by Day of the Week and Month",
+                              "Trips by Base and Month",
+                              "Heat Map of Hour and Day of Week",
+                              "Heat Map of Hour and Date",
+                              "Heat Map of Month and Day of Week",
+                              "Heat Map of Month and Date",
+                              "Heat Map of Base and Day of Week",
+                              "Heat Map of Week of Month and Month",
+                              "Prediction Model"))
     ),
     mainPanel(
-      tabPanel("Chart", plotOutput("plot1")),
-      tabPanel("Heat Map", plotOutput("plot2"))
+      plotOutput(outputId = "my_plot")
     )
   )
 )
 
 server <- function(input, output) {
-  selected_variables <- reactive({
-    df_combined %>% group_by(!!sym(input$VariableX), !!sym(input$Fill)) %>% summarise(Count = n())
-  })
   
-  output$plot1 <- renderPlot({
-    ggplot(selected_variables(), aes(x = !!sym(input$VariableX), y = Count, fill = !!sym(input$Fill))) + 
-      geom_bar(stat = "identity")
-  })
-  
-  output$plot2 <- renderPlot({
-    ggplot(selected_variables(), aes(x = !!sym(input$VariableX), y = !!sym(input$VariableY), fill = ..count..)) +
-      geom_tile() +
-      scale_fill_gradient(low = "white", high = "blue")
+  # Create plot based on user input
+  output$my_plot <- renderPlot({
+    if (input$plot_type == "Trips by Month") {
+      ggplot(month_counts, aes(x=Month, y=Trips, fill=Month)) + 
+        geom_bar(stat="identity") +
+        ggtitle("Count of Rides by Month") +
+        xlab("Month") + ylab("Trips")
+    } else if (input$plot_type == "Trips by Hour") {
+      ggplot(hour_counts, aes(x=Hour, y=Trips, fill=Hour)) + 
+        geom_bar(stat="identity") +
+        ggtitle("Count of Rides by Hour") +
+        xlab("Hour") + ylab("Count")
+    }else if (input$plot_type == "Trips by Day") {
+      ggplot(day_of_week_counts, aes(x=dayName, y=Trips, fill=dayName)) + 
+        geom_bar(stat="identity") +
+        ggtitle("Count of Rides by Day of the Week") +
+        xlab("Day") + ylab("Trips")
+    }else if (input$plot_type == "Trips by Hour and Month") {
+      ggplot(hourly_monthly_counts, aes(x = Hour, y = Trips, fill = Month)) + 
+        geom_bar(stat = "identity") +
+        ggtitle("Count of Trips by Hour and Month") +
+        xlab("Hour") + ylab("Trips")
+    }else if (input$plot_type == "Trips by Day of Week") {
+      ggplot(day_of_week_counts, aes(x=dayName, y=Trips, fill=dayName)) + 
+        geom_bar(stat="identity") +
+        ggtitle("Count of Rides by Day of the Week") +
+        xlab("Day") + ylab("Trips")
+    }else if (input$plot_type == "Trips by Day of the Week and Month") {
+      ggplot(dayName_monthly_counts, aes(x = dayName, y = Trips, fill = Month)) + 
+        geom_bar(stat = "identity") +
+        ggtitle("Count of Trips by Day Name and Month") +
+        xlab("Day Name") + ylab("Trips")
+    }else if (input$plot_type == "Trips by Base and Month") {
+      ggplot(base_monthly_counts, aes(x = Base, y = Trips, fill = Month)) + 
+        geom_bar(stat = "identity") +
+        ggtitle("Count of Trips by Base and Month") +
+        xlab("Base") + ylab("Trips")
+    }else if (input$plot_type == "Heat Map of Hour and Day of Week") {
+      ggplot(hour_dayName_trips, aes(x = Hour, y = dayName)) +
+        stat_bin2d(aes(fill = after_stat(count)), binwidth = c(1, 1)) +
+        scale_fill_gradient(low = "white", high = "blue") +
+        ggtitle("Hour and Day of Week") +
+        labs(x = "Hour of Day", y = "Day of Week", fill = "Number of Trips")
+      
+    }else if (input$plot_type == "Heat Map of Hour and Date") {
+      ggplot(hour_date_trips, aes(x = Hour, y = Date)) +
+        stat_bin2d(aes(fill = after_stat(count)), binwidth = c(1, 1)) +
+        scale_fill_gradient(low = "white", high = "blue") +
+        ggtitle("Hour and Date") +
+        labs(x = "Hour of Day", y = "Day of Month", fill = "Number of Trips")
+      
+    }else if (input$plot_type == "Heat Map of Month and Day of Week") {
+      ggplot(month_dayName_trips, aes(x = Month, y = dayName)) +
+        stat_bin2d(aes(fill = after_stat(count)), binwidth = c(1, 1)) +
+        scale_fill_gradient(low = "white", high = "blue") +
+        ggtitle("Month and Day of Week") +
+        labs(x = "Month", y = "Day of Week", fill = "Number of Trips")
+    }else if (input$plot_type == "Heat Map of Month and Date") {
+      ggplot(month_date_trips, aes(x = Month, y = Date)) +
+        stat_bin2d(aes(fill = after_stat(count)), binwidth = c(1, 1)) +
+        scale_fill_gradient(low = "white", high = "blue") +
+        ggtitle("Month and Date") +
+        labs(x = "Month", y = "Day of Month", fill = "Number of Trips")
+      
+    }else if (input$plot_type == "Heat Map of Week of Month and Month") {
+      ggplot(weekNum_month_trips, aes(x = weekNum, y = Month)) +
+        stat_bin2d(aes(fill = after_stat(count)), binwidth = c(1, 1)) +
+        scale_fill_gradient(low = "white", high = "blue") +
+        ggtitle("Week of Month and Month") +
+        labs(x = "Week of Month", y = "Month", fill = "Number of Trips")
+      
+    }else if (input$plot_type == "Heat Map of Base and Day of Week") {
+      ggplot(base_dayName_trips, aes(x = Base, y = dayName)) +
+        stat_bin2d(aes(fill = after_stat(count)), binwidth = c(1, 1)) +
+        scale_fill_gradient(low = "white", high = "blue") +
+        ggtitle("Base and Day of Week") +
+        labs(x = "Base", y = "Day of Week", fill = "Number of Trips")
+      
+    } else {
+      df_cortable<-prediction_model %>%
+        select(Date, Hour, weekNum, Lat, Lon, monthNum)
+      head(df_cortable)
+      B<-cor(df_cortable)
+      head(round(B,2))
+      corrplot(B, method="color")
+      
+    }
   })
 }
 
+# Run the app
 shinyApp(ui, server)
 ```
 
